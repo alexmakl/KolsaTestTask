@@ -8,11 +8,16 @@
 import Foundation
 
 final class ProductListViewModel {
-    private(set) var products: [Product] = []
-    private(set) var sortType: ProductSortType = .byPrice
     
-    init() {
-        parseMockData()
+    var onDataUpdate: (() -> Void)?
+    
+    private var products: [Product] = []
+    private var sortType: ProductSortType = .byPrice
+    private let productService: ProductServiceProtocol
+    
+    init(productService: ProductServiceProtocol = MockProductService()) {
+        self.productService = productService
+        fetchProducts()
     }
     
     func numberOfRows() -> Int {
@@ -25,34 +30,43 @@ final class ProductListViewModel {
     }
     
     func productCellViewModel(at index: Int) -> ProductCellViewModel? {
-        guard index > 0 else { return nil }
-        
-        let sortedProducts = sortedProductsList()
-        let product = sortedProducts[index - 1]
+        let product = products[index]
         return ProductCellViewModel(product: product)
     }
     
     func toggleSort() {
         sortType = (sortType == .byName) ? .byPrice : .byName
+        sortProducts()
+        onDataUpdate?()
     }
     
-    private func parseMockData() {
-        let data = Data(MockData.json.utf8)
-        if let decoded = try? JSONDecoder().decode([Product].self, from: data) {
-            self.products = decoded
-        } else {
-            self.products = []
+    func product(at index: Int) -> Product? {
+        products[index]
+    }
+    
+    private func fetchProducts() {
+        Task {
+            do {
+                let products = try await productService.fetchProducts()
+                await MainActor.run {
+                    self.products = products
+                    self.sortProducts()
+                    self.onDataUpdate?()
+                }
+            } catch {
+                print("Ошибка: \(error)")
+            }
         }
     }
     
-    private func sortedProductsList() -> [Product] {
+    private func sortProducts() {
         switch sortType {
         case .byName:
-            products.sorted {
+            products = products.sorted {
                 $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
             }
         case .byPrice:
-            products.sorted {
+            products = products.sorted {
                 $0.price < $1.price
             }
         }

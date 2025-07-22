@@ -14,7 +14,7 @@ final class SortButtonCell: UICollectionViewCell {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.adjustsFontForContentSizeCategory = true
-        label.font = UIFont.preferredFont(forTextStyle: .title3)
+        label.font = .boldSystemFont(ofSize: 20)
         return label
     }()
     

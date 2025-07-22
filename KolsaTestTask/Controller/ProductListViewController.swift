@@ -16,6 +16,10 @@ final class ProductListViewController: UIViewController {
         super.viewDidLoad()
         
         setupUI()
+        
+        viewModel.onDataUpdate = { [weak self] in
+            self?.collectionView.reloadData()
+        }
     }
 }
 
@@ -25,7 +29,9 @@ extension ProductListViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.item == 0 {
             viewModel.toggleSort()
-            collectionView.reloadData()
+        } else if let product = viewModel.product(at: indexPath.item - 1) {
+            let popup = PopupViewController(viewModel: ProductPopupViewModel(product: product))
+            present(popup, animated: false)
         }
     }
 }
@@ -51,7 +57,7 @@ extension ProductListViewController: UICollectionViewDataSource {
                 return UICollectionViewCell()
             }
             
-            if let vm = viewModel.productCellViewModel(at: indexPath.item) {
+            if let vm = viewModel.productCellViewModel(at: indexPath.item - 1) {
                 cell.configure(with: vm)
             }
             return cell

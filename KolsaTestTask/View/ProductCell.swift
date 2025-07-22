@@ -13,13 +13,13 @@ final class ProductCell: UICollectionViewCell {
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.font = .systemFont(ofSize: 16)
         return label
     }()
     
     private let priceLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.font = .systemFont(ofSize: 16)
         label.textColor = .systemGray
         return label
     }()
@@ -37,8 +37,6 @@ final class ProductCell: UICollectionViewCell {
         nameLabel.text = viewModel.name
         priceLabel.attributedText = viewModel.attributedPrice
     }
-    
-    // MARK: private
     
     private func setupViews() {
         contentView.addSubview(nameLabel)
